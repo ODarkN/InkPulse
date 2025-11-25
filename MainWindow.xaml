@@ -1,7 +1,7 @@
 ﻿<!--
 Author: ODarkN
 
-Project: InkPulse v0.1\MainWindow.xaml
+Project: InkPulse v0.2\MainWindow.xaml
 This XAML file defines the main window for the InkPulse VN engine.
 It contains the background, dialogue box, and choice button panel.
 It demonstrates WPF layout, styling, and dynamic UI elements.
