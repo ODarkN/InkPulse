@@ -56,9 +56,27 @@ namespace InkPulse
             ChoicePanel.VerticalAlignment = VerticalAlignment.Top;  // align panel to the top of the window
             ChoicePanel.Width = 200; // set fixed width for the panel
             ChoicePanel.Margin = new Thickness(10); // add spacing from window edges
+            ChoicePanel.Height = 260; // set panel height to fit all menu buttons
 
-            // add "Start" button to menu
-            AddChoice("Start", (s, e) =>
+            AddChoice("Start Demo", (s, e) =>
+            {
+                // Clear previous buttons
+                ChoicePanel.Children.Clear();
+
+                // Show demo message in dialogue box
+                DialogueBox.Visibility = Visibility.Visible;
+                DialogueText.Text = "Demo in production. Be patient!";
+
+                // Add a single button to return to menu
+                AddChoice("Back to the Menu", (s2, e2) =>
+                {
+                    inMenu = MenuActive;
+                    ShowMenu();
+                });
+            });
+
+            // add "Introduction" button to menu
+            AddChoice("Introduction", (s, e) =>
             {
                 inMenu = false; // mark that we left the menu and are starting the dialogue
                 dialogueIndex = 0; // reset dialogue index to the first line
