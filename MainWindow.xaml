@@ -1,0 +1,105 @@
+﻿<!--
+Author: ODarkN
+
+Project: InkPulse v0.2\MainWindow.xaml
+This XAML file defines the main window for the InkPulse VN engine.
+It contains the background, dialogue box, and choice button panel.
+It demonstrates WPF layout, styling, and dynamic UI elements.
+-->
+
+<!--
+Main application window for InkPulse Visual Novel engine.
+Sets window title, size, and startup location.
+Handles mouse clicks on the window to advance dialogue via Window_MouseDown event.
+-->
+<Window x:Class="InkPulse.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="InkPulse" Height="600" Width="800"
+        WindowStartupLocation="CenterScreen"
+        MouseDown="Window_MouseDown">
+
+    <!--
+    Main container for window elements, holds background, dialogue box, and choice panel.
+    -->
+    <Grid>
+        <!-- Game background: subtle aurora like gradient -->
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#88A0C0FF" Offset="0"/>
+                <!-- Top left color -->
+                <GradientStop Color="#88C0FFC0" Offset="0.3"/>
+                <!-- Mid top color -->
+                <GradientStop Color="#88FFC0C0" Offset="0.6"/>
+                <!-- Mid bottom color -->
+                <GradientStop Color="#88E0E0FF" Offset="1"/>
+                <!-- Bottom right color -->
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <!-- Dialogue box: semi transparent, rounded rectangle at bottom -->
+        <Border Name="DialogueBox" Background="#AA000000" CornerRadius="15" Height="150" VerticalAlignment="Bottom" Margin="10"
+                BorderThickness="3">
+            <!-- Dialogue border: gradient for better separation -->
+            <Border.BorderBrush>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#FF88CCFF" Offset="0"/>
+                    <GradientStop Color="#FFCC88FF" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.BorderBrush>
+
+            <!-- TextBlock: displays current dialogue line -->
+            <TextBlock Name="DialogueText" Foreground="White" FontWeight="Bold" FontSize="18" TextWrapping="Wrap" Margin="10"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"/>
+        </Border>
+
+        <!-- Choice panel: contains dynamically added buttons -->
+        <StackPanel Name="ChoicePanel" Orientation="Vertical" VerticalAlignment="Bottom" Margin="20,0,20,170" Height="200"/>
+    </Grid>
+
+    <!-- Window resources: define style for choice buttons -->
+    <Window.Resources>
+        <Style x:Key="ChoiceButtonStyle" TargetType="Button">
+            <!-- Basic font settings -->
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#AA000000"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <!-- Gradient border -->
+            <Setter Property="BorderBrush">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#88A0C0FF" Offset="0"/>
+                        <GradientStop Color="#88FFC0C0" Offset="1"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="5,2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <!-- ControlTemplate for rounded corners and hover effects -->
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <!-- Button border and content -->
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <!-- Hover and pressed triggers -->
+                        <ControlTemplate.Triggers>
+                            <!-- Hover effect -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#CC333333"/>
+                            </Trigger>
+                            <!-- Press effect -->
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#FF555555"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+</Window>
