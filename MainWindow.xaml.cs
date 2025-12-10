@@ -4,9 +4,11 @@ Author: ODarkN
 Project: InkPulse v0.21\MainWindow.xaml.cs
 This program handles the user interface for the InkPulse Visual Novel engine.
 It displays dialogue lines and dynamically adds choice buttons using WPF.
-All core game mechanics and dialogue progression are managed by GameEngine.
+All core game mechanics and dialogue progression are managed by GameEngine and DialogueUIController.
 */
 
+using Microsoft.VisualBasic;
+using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -21,36 +23,41 @@ namespace InkPulse
         // Instance of the game engine, handles core mechanics
         private readonly GameEngine gameEngine;
 
-        // Index of the currently displayed dialogue line
-        private int dialogueIndex = 0;
+        // Instance of the dialogue UI controller, handles dialogue display and choice buttons
+        private DialogueUIController dialogueController;
 
-        // Array of dialogue lines
-        private string[] dialogueLines = new string[]
-        {
-            "Welcome to InkPulse!",
-            "This is a simple Visual Novel engine created in C# and WPF.",
-            "At this stage, a menu panel is displayed first, and dialogue lines appear in the text window after starting.",
-            "You can click on the window to move to the next line of dialogue.",
-            "At the end of the dialogues, choice buttons appear.",
-            "The code is clean and easy to extend with new features.",
-            "Click a choice button to return to the menu or continue."
-        };
-
-        // Constructor: initializes UI components and shows first dialogue line
+        // Initializes UI components and shows first dialogue line
         public MainWindow()
         {
             InitializeComponent(); // Initialize all XAML components
+
+            // Retrieve the ChoiceButtonStyle from XAML resources after components are initialized
+            Style choiceButtonStyle = (Style)FindResource("ChoiceButtonStyle"); // Get style resource
+
             gameEngine = new GameEngine(); // Initialize engine
 
+            // Initialize dialogue controller with UI references, dialogue data and button style
+            dialogueController = new DialogueUIController(
+                gameEngine,
+                DialogueText,
+                ChoicePanel,
+                DialogueBox,
+                DialogueData.Introduction, // Starting dialogue set
+                choiceButtonStyle // Pass the style explicitly
+            );
+
             ShowMenu(); // Show menu at startup
+                        // At this point the main menu UI is prepared and ready for interaction
         }
 
-        // Display the main menu with two buttons: Start to begin the dialogue, Exit to close the application
-        private void ShowMenu()
+        // Display the main menu with Start, Introduction and Exit buttons
+        public void ShowMenu()
         {
             gameEngine.EnterMenu(); // Mark that we are in menu
+                                    // Set the engine to menu mode, so dialogue does not advance on clicks
 
             DialogueBox.Visibility = Visibility.Collapsed; // Hide dialogue box
+                                                           // Hide dialogue box in menu, only buttons are displayed
 
             // Configure the choice panel for the main menu
             ChoicePanel.Children.Clear();
@@ -61,57 +68,53 @@ namespace InkPulse
             ChoicePanel.Margin = new Thickness(10); // Add spacing from window edges
             ChoicePanel.Height = 260; // Set panel height to fit all menu buttons
 
+            // Add "Start Demo" button
             AddChoice("Start Demo", (s, e) =>
             {
                 // Clear previous buttons
                 ChoicePanel.Children.Clear();
 
-                // Show demo message in dialogue box
+                // Set dialogue controller to demo dialogues
                 DialogueBox.Visibility = Visibility.Visible;
-                DialogueText.Text = "Demo in production. Be patient!";
+                dialogueController = new DialogueUIController(
+                    gameEngine,
+                    DialogueText,
+                    ChoicePanel,
+                    DialogueBox,
+                    DialogueData.Demo,
+                    (Style)FindResource("ChoiceButtonStyle") // Pass style again
+                );
+                // Reset dialogue state when starting a new scene
+                gameEngine.ResetDialogue();
+
+                dialogueController.ShowDialogue();
 
                 // Add a single button to return to menu
                 AddChoice("Back to the Menu", (s2, e2) =>
                 {
-                    ShowMenu();
+                    ShowMenu(); // Return to the main menu after demo sequence ends
                 });
             });
+            // Each AddChoice creates a menu button and assigns its behavior
 
-            // Add "Introduction" button to menu
+
+            // Add "Introduction" button
             AddChoice("Introduction", (s, e) =>
             {
                 gameEngine.ExitMenu(); // Mark that we left the menu and are starting the dialogue
-                ShowDialogue(); // Start showing the dialogue
+                dialogueController = new DialogueUIController(
+                    gameEngine,
+                    DialogueText,
+                    ChoicePanel,
+                    DialogueBox,
+                    DialogueData.Introduction,
+                    (Style)FindResource("ChoiceButtonStyle") // Pass style again
+                );
+                dialogueController.ShowDialogue(); // Start introduction dialogue sequence
             });
 
-            // Add "Exit" button to menu
-            AddChoice("Exit", (s, e) => Application.Current.Shutdown()); // Close the application
-        }
-
-        // Displays the current dialogue line and sets up choice buttons if needed
-        private void ShowDialogue()
-        {
-            dialogueIndex = gameEngine.GetDialogueIndex(); // Get current dialogue index from engine
-            DialogueText.Text = dialogueLines[dialogueIndex]; // Update TextBlock with current dialogue
-            ChoicePanel.Children.Clear(); // Clear previous buttons
-            DialogueBox.Visibility = Visibility.Visible; // Show dialogue box
-
-            // If dialogue has ended, show choice buttons
-            if (gameEngine.DialogueEnded)
-            {
-                // Button to restart dialogue from the beginning
-                AddChoice("Continue", (s, e) =>
-                {
-                    gameEngine.ResetDialogue();
-                    ShowDialogue(); // Show first line again
-                });
-
-                // Button to return to the main menu
-                AddChoice("Back to the Menu", (s, e) =>
-                {
-                    ShowMenu(); // display the main menu again
-                });
-            }
+            // Add "Exit" button
+            AddChoice("Exit", (s, e) => Application.Current.Shutdown()); // Closes the application when Exit is clicked
         }
 
         // Adds a choice button to the ChoicePanel with specified text and click action
@@ -124,7 +127,7 @@ namespace InkPulse
                 Margin = new Thickness(10), // Space around button
                 FontSize = 18, // Font size
                 FontWeight = FontWeights.Bold, // Bold text
-                Height = 60, //Height of the button
+                Height = 60, // Height of the button
                 Style = (Style)FindResource("ChoiceButtonStyle") // Apply pre defined style
             };
 
@@ -135,10 +138,9 @@ namespace InkPulse
         // Handles mouse clicks on the window to advance dialogue
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (!gameEngine.InMenu && !gameEngine.DialogueEnded) // only advance dialogue if not in menu and not ended
+            if (!gameEngine.InMenu && !gameEngine.DialogueEnded) // Only advance dialogue if not in menu and not ended
             {
-                gameEngine.NextDialogue(dialogueLines.Length); // advance dialogue mechanically
-                ShowDialogue();
+                dialogueController.NextDialogue(); // Advance dialogue mechanically and update UI
             }
         }
     }

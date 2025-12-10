@@ -7,6 +7,10 @@ It manages game state such as menu activity and dialogue progression.
 UI and dialogue data are handled elsewhere to keep this file clean.
 */
 
+using System;
+using System.Windows.Controls;
+using System.Windows.Shapes;
+
 namespace InkPulse
 {
     // GameEngine class manages the internal logic of the Visual Novel engine
@@ -75,12 +79,14 @@ namespace InkPulse
         // Checks if there are more dialogue lines available, requires total line count from UI or DialogueManager
         public bool HasMoreDialogues(int totalCount)
         {
+            // Returns true if the current dialogue index is less than total dialogue lines
             return dialogueIndex < totalCount;
         }
 
         // Checks if the current dialogue line is the last one, requires total line count
         public bool IsLastDialogue(int totalCount)
         {
+            // Useful for UI to determine when to show end of dialogue buttons
             return dialogueIndex == totalCount - 1;
         }
     }

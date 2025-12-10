@@ -4,6 +4,8 @@
              xmlns:local="clr-namespace:InkPulse"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <!-- Global brushes matching current colors in MainWindow -->
+        <SolidColorBrush x:Key="DialogueBoxBackground" Color="#AA000000"/>
+        <SolidColorBrush x:Key="DialogueTextColor" Color="White"/>
     </Application.Resources>
 </Application>
